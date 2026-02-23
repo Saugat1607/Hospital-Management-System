@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Appointment;
+use Illuminate\Support\Facades\Auth;
+
+class PatientDashboardController extends Controller
+{
+    public function index()
+    {
+        $patient = Auth::user();
+        $appointments = Appointment::with('doctor')
+            ->where('patient_id', $patient->id)
+            ->orderBy('appointment_date', 'asc')
+            ->get();
+
+        $doctors = \App\Models\User::where('role', 'doctor')->get();
+
+        return view('patient.dashboard', compact('appointments', 'doctors'));
+    }
+
+    public function bookAppointment(Request $request)
+    {
+        $request->validate([
+            'doctor_id' => 'required|exists:users,id',
+            'appointment_date' => 'required|date|after:now',
+        ]);
+
+        Appointment::create([
+            'doctor_id' => $request->doctor_id,
+            'patient_id' => Auth::id(),
+            'appointment_date' => $request->appointment_date,
+        ]);
+
+        return back()->with('success', 'Appointment booked successfully!');
+    }
+}
