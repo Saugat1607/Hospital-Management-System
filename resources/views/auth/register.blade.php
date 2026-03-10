@@ -4,136 +4,390 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Hospital Register</title>
-
-    <!-- Font Awesome for icons -->
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <title>MediCare — Register</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        :root {
+            --cream: #f7f3ee;
+            --deep: #0d1b2a;
+            --teal: #0a7e6e;
+            --teal-light: #0fa88f;
+            --teal-pale: #e6f7f5;
+            --muted: #6b7280;
+            --border: #e5ded5;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            display:flex; justify-content:center; align-items:center; min-height:100vh;
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: var(--cream);
         }
 
-        .auth-container {
-            background-color: #fff;
-            width: 360px; 
-            padding:40px 35px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            text-align: center;
+        /* ── LEFT PANEL ── */
+        .left-panel {
+            background: linear-gradient(145deg, var(--deep) 0%, #0d2d40 50%, #0a3d35 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 48px;
+            position: relative;
+            overflow: hidden;
         }
 
-        h1 { color: #1e3c72; font-size:28px; margin-bottom:5px; }
-        p { color: #555; font-size:14px; margin-bottom:25px; }
-
-        .input-icon { position: relative; margin-bottom: 15px; }
-        .input-icon input, .input-icon select {
-            width: 100%; padding: 12px 40px 12px 12px;
-            border-radius: 8px; border: 1px solid #ccc; outline: none;
-            font-size: 14px; transition: 0.3s;
-        }
-        .input-icon input:focus, .input-icon select:focus { 
-            border-color: #1e3c72; 
-            box-shadow: 0 0 5px rgba(30,60,114,0.5); 
-        }
-        .input-icon i {
-            position: absolute; right: 12px; top:50%;
-            transform: translateY(-50%); color: #999;
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            top: -100px; right: -100px;
+            width: 400px; height: 400px;
+            background: rgba(10,126,110,0.12);
+            border-radius: 50%;
         }
 
-        button {
-            width: 100%; padding:12px;
-            background-color: #1e3c72; color:#fff; font-size:16px;
-            border:none; border-radius:8px; cursor:pointer;
-            transition:0.3s;
+        .left-panel::after {
+            content: '';
+            position: absolute;
+            bottom: -80px; left: -60px;
+            width: 300px; height: 300px;
+            background: rgba(10,126,110,0.08);
+            border-radius: 50%;
         }
-        button:hover { background-color: #16345a; }
 
-        a { display:block; margin-top:15px; color:#1e3c72; font-size:13px; text-decoration:none; transition:0.3s; }
-        a:hover { text-decoration:underline; }
-
-        .error { color:red; font-size:14px; margin-bottom:15px; text-align:left; }
-
-        /* Styled checkbox and label */
-        .checkbox-container {
+        .panel-logo {
             display: flex;
             align-items: center;
-            font-size: 13px;
-            color: #555;
-            margin-bottom: 20px;
-            gap:5px;
-        }
-        .checkbox-container input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            accent-color: #1e3c72;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
         }
 
-        @media (max-width:400px){ .auth-container{ width:90%; padding:30px; } }
+        .logo-icon {
+            width: 44px; height: 44px;
+            background: var(--teal);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+        }
+
+        .logo-text {
+            font-family: 'Playfair Display', serif;
+            color: #fff;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .panel-content { position: relative; z-index: 1; }
+
+        .panel-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.8);
+            font-size: 11px; font-weight: 500;
+            letter-spacing: 1.5px; text-transform: uppercase;
+            padding: 5px 14px; border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 40px; font-weight: 700;
+            color: #fff; line-height: 1.15;
+            margin-bottom: 16px;
+        }
+
+        .panel-title span { color: var(--teal-light); }
+
+        .panel-desc {
+            color: rgba(255,255,255,0.55);
+            font-size: 15px; line-height: 1.7;
+            max-width: 340px;
+        }
+
+        .steps {
+            display: flex; flex-direction: column;
+            gap: 16px; margin-top: 40px;
+        }
+
+        .step-item {
+            display: flex; align-items: center; gap: 14px;
+        }
+
+        .step-num {
+            width: 32px; height: 32px;
+            background: rgba(10,126,110,0.25);
+            border: 1px solid rgba(10,126,110,0.5);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 700;
+            color: var(--teal-light); flex-shrink: 0;
+        }
+
+        .step-text { color: rgba(255,255,255,0.65); font-size: 14px; }
+
+        .panel-footer {
+            color: rgba(255,255,255,0.3);
+            font-size: 12px; position: relative; z-index: 1;
+        }
+
+        /* ── RIGHT PANEL ── */
+        .right-panel {
+            display: flex; align-items: center;
+            justify-content: center;
+            padding: 48px; background: var(--cream);
+            overflow-y: auto;
+        }
+
+        .form-box { width: 100%; max-width: 400px; }
+
+        .form-header { margin-bottom: 28px; }
+
+        .form-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px; font-weight: 700;
+            color: var(--deep); margin-bottom: 6px;
+        }
+
+        .form-header p { color: var(--muted); font-size: 14px; }
+
+        .alert-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 12px 16px; border-radius: 10px;
+            font-size: 13px; margin-bottom: 20px;
+        }
+
+        .alert-error ul { padding-left: 16px; }
+        .alert-error ul li { margin-bottom: 4px; }
+
+        .form-group { margin-bottom: 16px; }
+
+        .form-label {
+            display: block; font-size: 12px; font-weight: 600;
+            color: var(--deep); text-transform: uppercase;
+            letter-spacing: 0.6px; margin-bottom: 7px;
+        }
+
+        .input-wrap { position: relative; }
+
+        .input-wrap input {
+            width: 100%; padding: 12px 44px 12px 16px;
+            border: 1.5px solid var(--border); border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px; color: var(--deep);
+            background: #fff; transition: all 0.2s; outline: none;
+        }
+
+        .input-wrap input:focus {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(10,126,110,0.1);
+        }
+
+        .input-wrap .icon {
+            position: absolute; right: 14px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 15px; pointer-events: none;
+        }
+
+        .patient-badge {
+            display: flex; align-items: center; gap: 10px;
+            background: var(--teal-pale);
+            border: 1.5px solid rgba(10,126,110,0.2);
+            border-radius: 12px; padding: 12px 16px;
+            margin-bottom: 20px; margin-top: 4px;
+        }
+
+        .badge-icon {
+            width: 36px; height: 36px; background: var(--teal);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; flex-shrink: 0;
+        }
+
+        .badge-text { font-size: 13px; color: var(--deep); }
+        .badge-text strong { color: var(--teal); font-weight: 700; }
+        .badge-text small { display: block; color: var(--muted); font-size: 11px; margin-top: 2px; }
+
+        .btn-register {
+            width: 100%; padding: 14px;
+            background: var(--teal); color: #fff;
+            border: none; border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px; font-weight: 700;
+            cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center;
+            justify-content: center; gap: 8px;
+        }
+
+        .btn-register:hover {
+            background: var(--teal-light);
+            box-shadow: 0 6px 18px rgba(10,126,110,0.35);
+            transform: translateY(-1px);
+        }
+
+        .divider {
+            display: flex; align-items: center;
+            gap: 12px; margin: 20px 0;
+            color: var(--muted); font-size: 12px;
+        }
+
+        .divider::before, .divider::after {
+            content: ''; flex: 1;
+            height: 1px; background: var(--border);
+        }
+
+        .login-link {
+            display: flex; align-items: center;
+            justify-content: center; gap: 6px;
+            width: 100%; padding: 13px;
+            border: 1.5px solid var(--border); border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px; font-weight: 500;
+            color: var(--deep); text-decoration: none;
+            background: #fff; transition: all 0.2s;
+        }
+
+        .login-link:hover {
+            border-color: var(--teal); color: var(--teal);
+            box-shadow: 0 4px 12px rgba(10,126,110,0.1);
+        }
+
+        @media (max-width: 768px) {
+            body { grid-template-columns: 1fr; }
+            .left-panel { display: none; }
+            .right-panel { padding: 32px 24px; }
+        }
     </style>
 </head>
 <body>
 
-<div class="auth-container">
-    <h1>Create Account</h1>
-    <p>Sign up to access the hospital system</p>
+<!-- LEFT PANEL -->
+<div class="left-panel">
+    <div class="panel-logo">
+        <div class="logo-icon">🏥</div>
+        <span class="logo-text">MediCare</span>
+    </div>
 
-    <!-- Validation Errors -->
-    @if ($errors->any())
-        <div class="error">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+    <div class="panel-content">
+        <div class="panel-tag">✦ Patient Registration</div>
+        <h1 class="panel-title">
+            Join <span>MediCare</span><br>Today
+        </h1>
+        <p class="panel-desc">
+            Create your free patient account and get instant access to our network of specialist doctors.
+        </p>
+
+        <div class="steps">
+            <div class="step-item">
+                <div class="step-num">1</div>
+                <span class="step-text">Create your account with email & password</span>
+            </div>
+            <div class="step-item">
+                <div class="step-num">2</div>
+                <span class="step-text">Browse doctors by specialization</span>
+            </div>
+            <div class="step-item">
+                <div class="step-num">3</div>
+                <span class="step-text">Book your appointment in seconds</span>
+            </div>
+            <div class="step-item">
+                <div class="step-num">4</div>
+                <span class="step-text">Track & manage all your appointments</span>
+            </div>
         </div>
-    @endif
+    </div>
 
-    <!-- Registration Form -->
-    <form method="POST" action="{{ route('register') }}">
-        @csrf
+    <div class="panel-footer">
+        © {{ date('Y') }} MediCare Hospital System. All rights reserved.
+    </div>
+</div>
 
-        <div class="input-icon">
-            <input type="text" name="name" placeholder="Full Name" value="{{ old('name') }}" required autofocus>
-            <i class="fas fa-user"></i>
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+    <div class="form-box">
+
+        <div class="form-header">
+            <h2>Create Account</h2>
+            <p>Fill in your details to get started</p>
         </div>
 
-        <div class="input-icon">
-            <input type="email" name="email" placeholder="Email" value="{{ old('email') }}" required>
-            <i class="fas fa-envelope"></i>
-        </div>
+        @if ($errors->any())
+            <div class="alert-error">
+                ⚠️
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-        <div class="input-icon">
-            <input type="password" name="password" placeholder="Password" required>
-            <i class="fas fa-lock"></i>
-        </div>
+        <form method="POST" action="{{ route('register') }}">
+            @csrf
 
-        <div class="input-icon">
-            <input type="password" name="password_confirmation" placeholder="Confirm Password" required>
-            <i class="fas fa-lock"></i>
-        </div>
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <div class="input-wrap">
+                    <input type="text" name="name" placeholder="John Smith"
+                           value="{{ old('name') }}" required autofocus>
+                    <span class="icon">👤</span>
+                </div>
+            </div>
 
-        <div class="input-icon">
-            <select name="role" required>
-                <option value="" disabled selected>Select Role</option>
-                <option value="patient">Patient</option>
-                <option value="doctor">Doctor</option>
-                <option value="admin">Admin</option>
-            </select>
-            <i class="fas fa-user-md"></i>
-        </div>
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <div class="input-wrap">
+                    <input type="email" name="email" placeholder="you@example.com"
+                           value="{{ old('email') }}" required>
+                    <span class="icon">✉️</span>
+                </div>
+            </div>
 
-        <label class="checkbox-container">
-            <input type="checkbox" name="terms" required>
-            I agree to the <a href="#">Terms and Conditions</a>
-        </label>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <div class="input-wrap">
+                    <input type="password" name="password"
+                           placeholder="Min. 8 characters" required>
+                    <span class="icon">🔒</span>
+                </div>
+            </div>
 
-        <button type="submit">Register</button>
+            <div class="form-group">
+                <label class="form-label">Confirm Password</label>
+                <div class="input-wrap">
+                    <input type="password" name="password_confirmation"
+                           placeholder="Repeat your password" required>
+                    <span class="icon">🔒</span>
+                </div>
+            </div>
 
-        <a href="{{ route('login') }}">Already have an account? Login</a>
-    </form>
+            <div class="patient-badge">
+                <div class="badge-icon">🧑‍⚕️</div>
+                <div class="badge-text">
+                    Registering as <strong>Patient</strong>
+                    <small>Doctors & admins are managed internally</small>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-register">
+                Create My Account →
+            </button>
+        </form>
+
+        <div class="divider">already have an account?</div>
+
+        <a href="{{ route('login') }}" class="login-link">
+            🔑 Sign In Instead
+        </a>
+
+    </div>
 </div>
 
 </body>

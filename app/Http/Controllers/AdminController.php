@@ -1,73 +1,77 @@
-<?php
+<?php 
+
 
 namespace App\Http\Controllers;
-
-use App\Models\User;
-use App\Models\Appointment;
-use Illuminate\Http\Request;
+use App\Services\AdminService;
+use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
-    /**
-     * Admin Dashboard
-     */
+    protected $adminService;
+
+    public function __construct(AdminService $adminService)
+    {
+        $this->adminService = $adminService;
+    }
+
+    // Admin Dashboard
     public function dashboard()
     {
-        $totalDoctors = User::where('role', 'doctor')->count();
-        $totalPatients = User::where('role', 'patient')->count();
-        $totalAppointments = Appointment::count();
-        $pendingAppointments = Appointment::where('status', 'pending')->count();
+        try {
+            $data = $this->adminService->getDashboardData();
+            return view('admin.dashboard', $data);
 
-        $latestAppointments = Appointment::with(['doctor', 'patient'])
-            ->latest()
-            ->take(5)
-            ->get();
+        } catch (\Exception $e) {
+            Log::critical('Failed to load admin dashboard', [
+                'error' => $e->getMessage()
+            ]);
 
-        return view('admin.dashboard', compact(
-            'totalDoctors',
-            'totalPatients',
-            'totalAppointments',
-            'pendingAppointments',
-            'latestAppointments'
-        ));
+            abort(500, 'Unable to load dashboard.');
+        }
     }
 
-    /**
-     * Doctors Grid Dashboard
-     */
-    public function doctorsList()
-    {
-        $doctors = User::where('role', 'doctor')
-            ->withCount('appointments')
-            ->get();
-
-        return view('admin.doctors_dashboard', compact('doctors'));
+    // Doctors Grid Dashboard
+   public function doctorsList()
+{
+    try {
+        $doctors = \App\Models\Doctor::with('category')->get();
+        return view('admin.doctors', compact('doctors')); // ← was admin.doctors.dashboard
+    } catch (\Exception $e) {
+        Log::critical('Failed to load doctors list', [
+            'error' => $e->getMessage()
+        ]);
+        abort(500, 'Unable to load doctors list.');
     }
+}
 
-    /**
-     * Appointments of a specific doctor
-     */
+    // Doctor's Appointments
     public function doctorAppointments($id)
     {
-        $doctor = User::where('role', 'doctor')->findOrFail($id);
+        try {
+            $data = $this->adminService->getDoctorAppointments($id);
+            return view('admin.doctor_appointments', $data);
 
-        $appointments = Appointment::where('doctor_id', $id)
-            ->with('patient')
-            ->latest()
-            ->get();
-
-        return view('admin.doctor_appointments', compact('doctor', 'appointments'));
+        } catch (\Exception $e) {
+            Log::critical('Failed to load doctor appointments', [
+                'doctor_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            abort(500, 'Unable to load doctor appointments.');
+        }
     }
 
-    /**
-     * Patients List
-     */
+    // Patients list
     public function patientsList()
     {
-        $patients = User::where('role', 'patient')
-            ->withCount('appointments')
-            ->get();    
-            return view('admin.patients_dashboard', compact('patients'));   
+        try {
+            $patients = $this->adminService->getPatients();
+            return view('admin.patients_dashboard', compact('patients'));
+
+        } catch (\Exception $e) {
+            Log::critical('Failed to load patients list', [
+                'error' => $e->getMessage()
+            ]);
+            abort(500, 'Unable to load patients list.');
+        }
     }
-    
 }

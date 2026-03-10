@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\PatientController;
-
+use App\Services\PatientService;
 /*
 |--------------------------------------------------------------------------
 | Landing Page
@@ -65,7 +65,7 @@ Route::middleware(['auth'])
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])
+Route::middleware(['auth.doctor'])          // ← was ['auth'], now ['auth.doctor']
     ->prefix('doctor')
     ->name('doctor.')
     ->group(function () {
@@ -80,7 +80,6 @@ Route::middleware(['auth'])
             ->name('appointment.complete');
     });
 
-
 /*
 |--------------------------------------------------------------------------
 | PATIENT ROUTES
@@ -92,16 +91,26 @@ Route::middleware(['auth'])
     ->name('patient.')
     ->group(function () {
 
-        Route::get('/dashboard', [PatientController::class,'dashboard'])
+        // 1️⃣ Dashboard showing all doctors
+        Route::get('/dashboard', [PatientController::class, 'dashboard'])
             ->name('dashboard');
 
-        Route::get('/book', [PatientController::class,'create'])
-            ->name('book');
+        // 2️⃣ Doctor booking form page (click "Book Now")
+        Route::get('/book/{doctor}', [PatientController::class, 'doctorBookingForm'])
+            ->name('doctor.book');
 
-        Route::post('/book', [PatientController::class,'store'])
+        // 3️⃣ Store appointment
+        Route::post('/book', [PatientController::class, 'store'])
             ->name('book.store');
-    });
-/*
+
+        // 4️⃣ AJAX route to get booked slots for a doctor on a specific date
+        Route::get('/booked-slots/{doctor}/{date}', function($doctor, $date, PatientService $service) {
+            return response()->json($service->getBookedTimeSlots($doctor, $date));
+        })->name('booked.slots');
+});
+
+    /*
+
 |--------------------------------------------------------------------------
 | PROFILE ROUTES
 |--------------------------------------------------------------------------

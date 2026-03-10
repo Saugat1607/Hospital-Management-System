@@ -1,4 +1,9 @@
-<div class="bg-white shadow rounded-lg p-4">
-    <h2 class="text-sm font-medium text-gray-500">{{ $title }}</h2>
-    <p class="mt-2 text-2xl font-semibold text-gray-900">{{ $value }}</p>
+<div class="bg-white border border-gray-200 rounded-xl shadow-md p-6">
+    <p class="text-gray-700 font-semibold text-lg">
+        {{ $title }}
+    </p>
+
+    <h2 class="text-4xl font-bold text-{{ $color }}-700 mt-3">
+        {{ $value }}
+    </h2>
 </div>

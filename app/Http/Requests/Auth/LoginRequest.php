@@ -37,20 +37,28 @@ class LoginRequest extends FormRequest
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function authenticate(): void
-    {
-        $this->ensureIsNotRateLimited();
+public function authenticate(): void
+{
+    $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
-
-            throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
-            ]);
-        }
-
+    // 1️⃣ Try doctor guard first
+    $doctor = \App\Models\Doctor::where('email', $this->email)->first();
+    if ($doctor && \Illuminate\Support\Facades\Hash::check($this->password, $doctor->password)) {
+        Auth::guard('doctor')->login($doctor);
         RateLimiter::clear($this->throttleKey());
+        return; // ← stop here, skip web guard
     }
+
+    // 2️⃣ Try web guard (patient / admin)
+    if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        RateLimiter::hit($this->throttleKey());
+        throw ValidationException::withMessages([
+            'email' => trans('auth.failed'),
+        ]);
+    }
+
+    RateLimiter::clear($this->throttleKey());
+}
 
     /**
      * Ensure the login request is not rate limited.

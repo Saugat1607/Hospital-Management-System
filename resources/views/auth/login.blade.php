@@ -4,72 +4,440 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Hospital Login</title>
-
-    <!-- Font Awesome for icons -->
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <title>MediCare — Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        :root {
+            --cream: #f7f3ee;
+            --deep: #0d1b2a;
+            --teal: #0a7e6e;
+            --teal-light: #0fa88f;
+            --teal-pale: #e6f7f5;
+            --muted: #6b7280;
+            --border: #e5ded5;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            height: 100vh;
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: var(--cream);
+        }
+
+        /* ── LEFT PANEL ── */
+        .left-panel {
+            background: linear-gradient(145deg, var(--deep) 0%, #0d2d40 50%, #0a3d35 100%);
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            top: -100px; right: -100px;
+            width: 400px; height: 400px;
+            background: rgba(10,126,110,0.12);
+            border-radius: 50%;
+        }
+
+        .left-panel::after {
+            content: '';
+            position: absolute;
+            bottom: -80px; left: -60px;
+            width: 300px; height: 300px;
+            background: rgba(10,126,110,0.08);
+            border-radius: 50%;
+        }
+
+        .panel-logo {
+            display: flex;
             align-items: center;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
         }
-        .auth-container {
-            background-color: #ffffff;
-            width: 360px;
-            padding: 40px 35px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            text-align: center;
+
+        .logo-icon {
+            width: 44px; height: 44px;
+            background: var(--teal);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
         }
-        h1 { color: #1e3c72; font-size: 28px; margin-bottom: 10px; }
-        p { color: #555; font-size: 14px; margin-bottom: 25px; }
-        form input[type="email"], form input[type="password"] {
-            width: 100%; padding: 12px 40px 12px 12px; margin-bottom: 20px;
-            border-radius: 8px; border: 1px solid #ccc; outline: none; font-size: 14px;
-            transition: 0.3s;
+
+        .logo-text {
+            font-family: 'Playfair Display', serif;
+            color: #fff;
+            font-size: 22px;
+            font-weight: 700;
         }
-        form input:focus { border-color: #1e3c72; box-shadow: 0 0 5px rgba(30,60,114,0.5); }
-        .input-icon { position: relative; }
-        .input-icon i { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #999; }
-        button {
-            width: 100%; padding: 12px; background-color: #1e3c72; color: #fff;
-            font-size: 16px; border: none; border-radius: 8px; cursor: pointer;
-            transition: 0.3s;
+
+        .panel-content {
+            position: relative;
+            z-index: 1;
         }
-        button:hover { background-color: #16345a; }
-        a { display: block; margin-top: 15px; color: #1e3c72; font-size: 13px; text-decoration: none; transition: 0.3s; }
-        a:hover { text-decoration: underline; }
-        @media (max-width: 400px) { .auth-container { width: 90%; padding: 30px; } }
+
+        .panel-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.8);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 5px 14px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 42px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.15;
+            margin-bottom: 16px;
+        }
+
+        .panel-title span {
+            color: var(--teal-light);
+        }
+
+        .panel-desc {
+            color: rgba(255,255,255,0.55);
+            font-size: 15px;
+            line-height: 1.7;
+            max-width: 340px;
+        }
+
+        .panel-features {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 40px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255,255,255,0.7);
+            font-size: 14px;
+        }
+
+        .feature-dot {
+            width: 32px; height: 32px;
+            background: rgba(10,126,110,0.25);
+            border: 1px solid rgba(10,126,110,0.4);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .panel-footer {
+            color: rgba(255,255,255,0.3);
+            font-size: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── RIGHT PANEL ── */
+        .right-panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 48px;
+            background: var(--cream);
+        }
+
+        .form-box {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .form-header {
+            margin-bottom: 36px;
+        }
+
+        .form-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 30px;
+            font-weight: 700;
+            color: var(--deep);
+            margin-bottom: 8px;
+        }
+
+        .form-header p {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* ── ALERTS ── */
+        .alert-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ── FORM ELEMENTS ── */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--deep);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 8px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap input {
+            width: 100%;
+            padding: 12px 44px 12px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            color: var(--deep);
+            background: #fff;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .input-wrap input:focus {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(10,126,110,0.1);
+        }
+
+        .input-wrap .input-icon {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 15px;
+            pointer-events: none;
+        }
+
+        /* ── SUBMIT ── */
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: var(--teal);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-login:hover {
+            background: var(--teal-light);
+            box-shadow: 0 6px 18px rgba(10,126,110,0.35);
+            transform: translateY(-1px);
+        }
+
+        /* ── DIVIDER ── */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* ── LINKS ── */
+        .form-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .form-links a {
+            color: var(--teal);
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .form-links a:hover { color: var(--teal-light); }
+
+        .register-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            padding: 13px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--deep) !important;
+            text-decoration: none;
+            transition: all 0.2s;
+            background: #fff;
+        }
+
+        .register-link:hover {
+            border-color: var(--teal);
+            color: var(--teal) !important;
+            box-shadow: 0 4px 12px rgba(10,126,110,0.1);
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            body { grid-template-columns: 1fr; }
+            .left-panel { display: none; }
+            .right-panel { padding: 32px 24px; }
+        }
     </style>
 </head>
 <body>
 
-<div class="auth-container">
-    <h1>Hospital Login</h1>
-    <p>Enter your credentials to access the system</p>
+<!-- LEFT PANEL -->
+<div class="left-panel">
+    <div class="panel-logo">
+        <div class="logo-icon">🏥</div>
+        <span class="logo-text">MediCare</span>
+    </div>
 
-    <form method="POST" action="{{ route('login') }}">
-        @csrf
-        <div class="input-icon">
-            <input type="email" name="email" placeholder="Email" required autofocus>
-            <i class="fas fa-envelope"></i>
+    <div class="panel-content">
+        <div class="panel-tag">✦ Hospital Management System</div>
+        <h1 class="panel-title">
+            Your Health,<br>
+            Our <span>Priority</span>
+        </h1>
+        <p class="panel-desc">
+            Access your appointments, connect with specialist doctors, and manage your healthcare journey — all in one place.
+        </p>
+
+        <div class="panel-features">
+            <div class="feature-item">
+                <div class="feature-dot">🩺</div>
+                Book appointments with specialist doctors
+            </div>
+            <div class="feature-item">
+                <div class="feature-dot">📋</div>
+                Track your appointment history
+            </div>
+            <div class="feature-item">
+                <div class="feature-dot">🔒</div>
+                Secure & private patient records
+            </div>
+            <div class="feature-item">
+                <div class="feature-dot">⚡</div>
+                Real-time slot availability
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-footer">
+        © {{ date('Y') }} MediCare Hospital System. All rights reserved.
+    </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+    <div class="form-box">
+
+        <div class="form-header">
+            <h2>Welcome back</h2>
+            <p>Sign in to your account to continue</p>
         </div>
 
-        <div class="input-icon">
-            <input type="password" name="password" placeholder="Password" required>
-            <i class="fas fa-lock"></i>
+        @if ($errors->any())
+            <div class="alert-error">
+                ⚠️ {{ $errors->first() }}
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('login') }}">
+            @csrf
+
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <div class="input-wrap">
+                    <input type="email" name="email"
+                           placeholder="you@example.com"
+                           value="{{ old('email') }}"
+                           required autofocus>
+                    <span class="input-icon">✉️</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <div class="input-wrap">
+                    <input type="password" name="password"
+                           placeholder="Enter your password"
+                           required>
+                    <span class="input-icon">🔒</span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login">
+                Sign In →
+            </button>
+        </form>
+
+        <div class="divider">or</div>
+
+        <div class="form-links">
+            <a href="{{ route('register') }}" class="register-link">
+                👤 Create a Patient Account
+            </a>
+            <a href="{{ route('password.request') }}">Forgot your password?</a>
         </div>
 
-        <button type="submit">Login</button>
-
-        <a href="{{ route('password.request') }}">Forgot your password?</a>
-        <a href="{{ route('register') }}">Don't have an account? Register</a>
-    </form>
+    </div>
 </div>
 
 </body>

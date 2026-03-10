@@ -2,54 +2,63 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Appointment;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Services\PatientService;
 
 class PatientController extends Controller
 {
-    // Patient dashboard
+    protected $patientService;
+
+    public function __construct(PatientService $patientService)
+    {
+        $this->patientService = $patientService;
+    }
+
+    // 1️⃣ Patient Dashboard: List of doctors + patient appointments
     public function dashboard()
     {
-        // Get all appointments of the patient
-        $appointments = Appointment::where('patient_id', Auth::id())
-            ->with('doctor') // eager load doctor
-            ->latest()
-            ->get();
+         $categories   = $this->patientService->getAllCategories();
+        $doctors = $this->patientService->getAllDoctors();
+        $appointments = $this->patientService->getPatientAppointments();
 
-        // Get all doctors for the dashboard
-        $doctors = User::where('role', 'doctor')->get();
-
-        // Pass both variables to the view
-        return view('patient.dashboard', compact('appointments', 'doctors'));
+        return view('patient.dashboard', compact('categories', 'doctors', 'appointments'));
     }
 
-    // Show booking form
-    public function create()
+    // 2️⃣ Doctor Booking Page: Show doctor profile + booking form + patient's appointments
+    public function doctorBookingForm($id)
     {
-        $doctors = User::where('role', 'doctor')->get();
-        return view('patient.book', compact('doctors'));
+        $doctor = $this->patientService->getDoctor($id);
+        $appointments = $this->patientService->getPatientAppointments();
+
+        return view('patient.doctor_booking', compact('doctor', 'appointments'));
     }
 
-    // Store appointment
+    // 3️⃣ Store Appointment
     public function store(Request $request)
     {
         $request->validate([
-            'doctor_id' => 'required|exists:users,id',
-            'appointment_date' => 'required|date|after:today',
+            'doctor_id' => 'required|exists:doctors,id',
+            'appointment_date' => 'required|date|after_or_equal:today',
+            'appointment_time' => 'required',
             'reason' => 'required|string|max:255',
         ]);
 
-        Appointment::create([
-            'patient_id' => Auth::id(),
-            'doctor_id' => $request->doctor_id,
-            'appointment_date' => $request->appointment_date,
-            'reason' => $request->reason,
-        ]); 
+        $appointment = $this->patientService->bookAppointment($request->only([
+            'doctor_id', 'appointment_date', 'appointment_time', 'reason'
+        ]));
 
-        return redirect()
-            ->route('patient.dashboard')
-            ->with('success', 'Appointment booked successfully!');
+        if (!$appointment) {
+            return redirect()->back()->with('error', 'This slot is either in the past or already booked.');
+        }
+
+        return redirect()->route('patient.doctor.book', $request->doctor_id)
+                         ->with('success', 'Appointment booked successfully!');
+    }
+
+    // 4️⃣ AJAX: Get booked slots for a doctor on a given date
+    public function getBookedSlots($doctorId, $date)
+    {
+        $slots = $this->patientService->getBookedTimeSlots($doctorId, $date);
+        return response()->json($slots);
     }
 }

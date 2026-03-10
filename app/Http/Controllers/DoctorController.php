@@ -2,61 +2,73 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Appointment;
+use App\Services\DoctorService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class DoctorController extends Controller
 {
-    // Dashboard view
+    protected $doctorService;
+
+    public function __construct(DoctorService $doctorService)
+    {
+        $this->doctorService = $doctorService;
+    }
+
+    // Doctor Dashboard
     public function dashboard()
     {
-        $doctorId = Auth::id();
-
-        $appointments = Appointment::where('doctor_id', $doctorId)
-            ->with('patient')
-            ->orderBy('appointment_date', 'desc')
-            ->get();
-
-        $totalAppointments = $appointments->count();
-        $upcomingAppointments = $appointments->where('status', 'pending')->count();
-        $completedAppointments = $appointments->where('status', 'completed')->count();
-        $cancelledAppointments = $appointments->where('status', 'cancelled')->count();
-
-        return view('doctor.dashboard', compact(
-            'appointments',
-            'totalAppointments',
-            'upcomingAppointments',
-            'completedAppointments',
-            'cancelledAppointments'
-        ));
+        try {
+            $doctor = Auth::guard('doctor')->user(); // ← use doctor guard
+            $data = $this->doctorService->getDashboardData($doctor->id);
+            return view('doctor.dashboard', $data);
+        } catch (\Exception $e) {
+            Log::critical('Failed to load doctor dashboard', [
+                'error' => $e->getMessage()
+            ]);
+            abort(500, 'Unable to load dashboard.');
+        }
     }
 
-    // View a single appointment
+    // View Single Appointment
     public function showAppointment($id)
     {
-        $appointment = Appointment::with('patient')->findOrFail($id);
-
-        // Ensure this appointment belongs to the logged-in doctor
-        if ($appointment->doctor_id != Auth::id()) {
-            abort(403, 'Unauthorized');
+        try {
+            $doctor = Auth::guard('doctor')->user(); // ← use doctor guard
+            $appointment = $this->doctorService->getAppointment($doctor->id, $id);
+            return response()->json([
+                'status' => 'success',
+                'appointment' => $appointment
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to load appointment', [
+                'error' => $e->getMessage()
+            ]);
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Unable to load appointment.'
+            ], 500);
         }
-
-        return view('doctor.appointment-view', compact('appointment'));
     }
 
-    // Mark appointment as completed
+    // Complete Appointment
     public function completeAppointment($id)
     {
-        $appointment = Appointment::findOrFail($id);
-
-        if ($appointment->doctor_id != Auth::id()) {
-            abort(403, 'Unauthorized');
+        try {
+            $doctor = Auth::guard('doctor')->user(); // ← use doctor guard
+            $this->doctorService->completeAppointment($doctor->id, $id);
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Appointment marked as completed.'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to complete appointment', [
+                'error' => $e->getMessage()
+            ]);
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Failed to complete appointment.'
+            ], 500);
         }
-
-        $appointment->status = 'completed';
-        $appointment->save();
-
-        return redirect()->back()->with('success', 'Appointment marked as completed.');
     }
 }
